@@ -6,6 +6,9 @@ const bodyParser = require('body-parser');
 const wallRouter = require('./routes/wallRouter');
 const userRouter = require('./routes/userRouter');
 const mongoose = require('mongoose');
+var passport = require('passport');
+var authenticate = require('./authenticate');
+var config = require('./config');
 
 var app = express();
 var port = 3000;
@@ -16,7 +19,8 @@ app.use(morgan('dev'));
 app.use(bodyParser.json());
 
 
-app.use('/user', wallRouter);
+app.use(passport.initialize());
+app.use('/wall', wallRouter);
 app.use('/users', userRouter);
 // app.use('/comments', commentsRouter);
 
@@ -44,7 +48,7 @@ server.listen(port, hostname, () => {
 
 
 //Connect to DB
-const url = 'mongodb://localhost:27017/conFusion';
+const url = 'mongodb://localhost:27017/facebookWall';
 const connect = mongoose.connect(url, { useUnifiedTopology: true, useNewUrlParser: true, useCreateIndex: true, useFindAndModify:false } );
 connect.then((db) => {
     console.log("Connected correctly to server");

@@ -1,29 +1,10 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-const User = new Schema({
-    FirstName : {
-        type: String
-    },
-    LastName : {
-        type: String
-    },
-    UserID : {
-        type: String
-    }
-}, {
-    timestamps: true
-});
-
 const Reaction = new Schema({
-    FirstName : {
-        type: String
-    },
-    LastName : {
-        type: String
-    },
-    UserID : {
-        type: String
+    User : {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
     },
     Type : {
         type : String,
@@ -38,7 +19,8 @@ const Comment = new Schema({
         type: String
     },
     Author : {
-        type: User
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
     },
     Reactions : {
         type: [Reaction]
@@ -53,8 +35,8 @@ const postSchema = new Schema({
         required: true
     },
     Author : {
-        type: User,
-        required: true
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
     },
     Reactions : {
         type: [Reaction]
