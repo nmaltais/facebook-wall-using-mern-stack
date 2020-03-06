@@ -3,7 +3,8 @@ const path = require('path');
 const http = require('http');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
-const wallRouter = require('./routes/wallRouter');
+const postsRouter = require('./routes/postsRouter');
+const reactionsRouter = require('./routes/reactionsRouter');
 const userRouter = require('./routes/userRouter');
 const mongoose = require('mongoose');
 var passport = require('passport');
@@ -20,11 +21,10 @@ app.use(bodyParser.json());
 
 
 app.use(passport.initialize());
-app.use('/wall', wallRouter);
+app.use('/posts', postsRouter);
 app.use('/users', userRouter);
+app.use('/reactions', reactionsRouter);
 // app.use('/comments', commentsRouter);
-
-
 
 
 app.use((req, res, next) => {

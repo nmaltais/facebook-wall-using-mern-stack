@@ -1,0 +1,42 @@
+$primary-dark: #232F34;
+$primary-dark-text: white;
+$primary-mid: #344955;
+$primary-light: #4A6572;
+$secondary: #F9AA33;
+
+.nav{
+    border-radius: 0px !important;
+    height: 50px !important;
+    background-color: $primary-dark !important;
+    text-align: center;
+    color: $primary-dark-text;
+    font-size: 30px !important;
+    line-height: 50px !important;
+    padding: 0px !important;
+    border: 0px !important;
+
+    .Menu{
+        background-color: $primary-mid !important;
+        min-height: 50px !important;
+        border-radius: 0px !important;
+        border: 0px !important;
+
+        .icon{
+        color: $primary-dark-text !important;
+        }
+
+        .dropdown{
+
+            .menu{
+                background-color: $primary-mid !important;
+                .divider{
+                    border-top-color: rgba(255,255,255,0.5) !important;
+                }
+            }
+        }
+
+    }
+    .ui.menu .ui.dropdown .menu>.item.Item{
+        color: $primary-dark-text !important;
+    }
+}

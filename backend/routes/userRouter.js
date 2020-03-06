@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const authenticate = require('../authenticate');
 var passport = require('passport');
+const cors = require('./cors');
 
 
 const Users = require('../models/users');
@@ -9,6 +10,9 @@ const Users = require('../models/users');
 const userRouter = express.Router();
 userRouter.use(bodyParser.json());
 
+userRouter.options('*', cors.corsWithOptions, (req,res) => {
+    res.sendStatus(200);
+})
 
 userRouter.route('/')
 .get((req, res, next) => {
@@ -21,17 +25,12 @@ userRouter.route('/')
     .catch((err) => next(err));
 })
 .post((req, res, next) => {
-    Users.create(req.body)
-    .then((user) => {
-        res.statusCode = 200;
-        res.setHeader('Content-Type', 'application/json');
-        res.json(user);
-    }, (err) => next(err))
-    .catch((err) => next(err));
+    res.statusCode = 403;
+    res.end('POST operation not supported on /users');
 })
 .put((req, res, next) => {
     res.statusCode = 403;
-    res.end('POST operation not supported on /users');
+    res.end('PUT operation not supported on /users');
 })
 .delete((req, res, next) => {
     Users.deleteMany({})
@@ -43,7 +42,8 @@ userRouter.route('/')
     .catch((err) => next(err));
 })
 
-userRouter.post('/signup', (req, res, next) => {
+userRouter.post('/signup', cors.corsWithOptions, (req, res, next) => {
+
   Users.register(new Users(req.body),
     req.body.password, (err, user) => {
     if(err) {
@@ -52,10 +52,6 @@ userRouter.post('/signup', (req, res, next) => {
       res.json({err: err});
     }
     else {
-      // if (req.body.firstname)
-      //   user.firstname = req.body.firstname;
-      // if (req.body.lastname)
-      //   user.lastname = req.body.lastname;
       user.save((err, user) => {
         if (err) {
           res.statusCode = 500;
@@ -73,14 +69,17 @@ userRouter.post('/signup', (req, res, next) => {
   });
 });
 
-userRouter.post('/login', passport.authenticate('local'), (req, res) => {
+userRouter.post('/login', cors.corsWithOptions, passport.authenticate('local'), (req, res) => {
   var token = authenticate.getToken({_id: req.user._id});
   res.statusCode = 200;
   res.setHeader('Content-Type', 'application/json');
-  res.json({success: true, token: token, status: 'You are successfully logged in!'});
+  Users.findOne({_id: req.user._id})
+  .then((user) => {
+      res.json({success: true, token: token, user: user, status: 'You are successfully logged in!'});
+  });
 });
 
-userRouter.get('/logout', (req, res) => {
+userRouter.get('/logout', cors.corsWithOptions, (req, res, next) => {
   if (req.session) {
     req.session.destroy();
     res.clearCookie('session-id');

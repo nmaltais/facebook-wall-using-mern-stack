@@ -1,14 +1,16 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-const Reaction = new Schema({
+const reactionSchema = new Schema({
     User : {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
+        ref: 'User',
+        required: true
     },
     Type : {
         type : String,
-        default: 'Like'
+        default: 'Like',
+        required: true
     }
 }, {
     timestamps: true
@@ -23,7 +25,8 @@ const Comment = new Schema({
         ref: 'User'
     },
     Reactions : {
-        type: [Reaction]
+        type: [{type: mongoose.Schema.Types.ObjectId,
+        ref: 'Reaction'}]
     }
 }, {
     timestamps: true
@@ -34,16 +37,24 @@ const postSchema = new Schema({
         type: String,
         required: true
     },
+    OnWallOf : {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    },
     Author : {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
     },
     Reactions : {
-        type: [Reaction]
+        type: [{type: mongoose.Schema.Types.ObjectId,
+        ref: 'Reaction'}]
     },
     Comments : {
-        type: [Comment]
+        type: [{type: mongoose.Schema.Types.ObjectId,
+        ref: 'Comment'}]
     }
+}, {
+    timestamps: true
 });
 /*{
 	"Text" : "this is a post",
@@ -58,5 +69,6 @@ const postSchema = new Schema({
 
 
 var Posts = mongoose.model('Post', postSchema);
+var Reactions = mongoose.model('Reaction', reactionSchema);
 
-module.exports = Posts;
+module.exports = {'Posts' : Posts, 'Reactions' : Reactions};
