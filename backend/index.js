@@ -24,7 +24,6 @@ app.use(passport.initialize());
 app.use('/posts', postsRouter);
 app.use('/users', userRouter);
 app.use('/reactions', reactionsRouter);
-// app.use('/comments', commentsRouter);
 
 
 app.use((req, res, next) => {

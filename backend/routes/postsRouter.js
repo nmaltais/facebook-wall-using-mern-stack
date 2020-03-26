@@ -4,7 +4,7 @@ const authenticate = require('../authenticate');
 const cors = require('./cors');
 
 
-const {Posts, Reactions} = require('../models/posts');
+const {Posts, Reactions, Comments} = require('../models/posts');
 const Users = require('../models/users');
 
 const postsRouter = express.Router();
@@ -71,6 +71,7 @@ postsRouter.route('/:username')
     }, (err) => next(err))
     .catch((err) => next(err));
 });
+
 postsRouter.route('/:postID') //Would conflict with /:username .delete if implemented
 .delete(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
   //Delete a post on a user's post
@@ -183,5 +184,47 @@ postsRouter.route('/react/:postID')
     .catch((err) => next(err));
 });
 
+postsRouter.route('/:postID/comments')
+.post(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
+    //Add a comment to this post for a user
+    Posts.findOne({_id : req.params.postID})
+    .then((post) => {
+        if(!post){
+            res.statusCode = 403;
+            res.end('Post _id: '+req.params.postID+' cannot be found');
+        } else {
+            req.body.Author = req.user._id;
+            Comments.create(req.body)
+            .then((comment) => {
+                post.Comments.push(comment._id);
+                post.save()
+                res.statusCode = 200;
+                res.setHeader('Content-Type', 'application/json');
+                res.json(post);
+            }, (err) => next(err))
+            .catch((err) => next(err));
+        }
+    }, (err) => next(err))
+    .catch((err) => next(err));
+})
+.get(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
+    //Add a comment to this post for a user
+    Posts.findOne({_id : req.params.postID})
+    .populate({ path: 'Comments',
+                // Get User for each reaction
+                populate: { path: 'Author' }
+              })
+    .then((post) => {
+        if(!post){
+            res.statusCode = 403;
+            res.end('Post _id: '+req.params.postID+' cannot be found');
+        } else {
+            res.statusCode = 200;
+            res.setHeader('Content-Type', 'application/json');
+            res.json(post.Comments);
+        }
+    }, (err) => next(err))
+    .catch((err) => next(err));
+})
 
 module.exports = postsRouter;

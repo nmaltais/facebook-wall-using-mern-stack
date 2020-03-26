@@ -16,7 +16,7 @@ const reactionSchema = new Schema({
     timestamps: true
 });
 
-const Comment = new Schema({
+const commentSchema = new Schema({
     Text : {
         type: String
     },
@@ -70,5 +70,6 @@ const postSchema = new Schema({
 
 var Posts = mongoose.model('Post', postSchema);
 var Reactions = mongoose.model('Reaction', reactionSchema);
+var Comments = mongoose.model('Comment', commentSchema);
 
-module.exports = {'Posts' : Posts, 'Reactions' : Reactions};
+module.exports = {'Posts' : Posts, 'Reactions' : Reactions, 'Comments' : Comments};
