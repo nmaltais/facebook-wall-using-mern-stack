@@ -36,6 +36,7 @@ class App extends Component {
             this.setState({
                 logged_in: true,
                 user: json.user,
+                isTokenValidated: true,
                 login_errors: null
             });
         }).catch(error => {
@@ -93,43 +94,57 @@ class App extends Component {
         window.location = '/login';
     }
 
-    componentDidMount(){
-        console.log(this.state.user);
+    constructor(props){
+        super(props);
         let token = localStorage.getItem('token');
-        if(token){
-            console.log('token: ' + token);
-        }else{
-            console.log('no token');
+        this.state.isTokenValidated =  () => {
+            let token = localStorage.getItem('token');
+            if(token){
+                fetch('http://127.0.0.1:3000/users/checkJWTtoken', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer '+token
+                    }
+                })
+                .then((resp) => resp.json())
+                .then((json) => {
+                    console.log('token valid');
+                    console.log(json);
+                    return json;
+                });
+            }else{
+                return false;
+            }
         }
+        console.log(this.state.isTokenValidated);
     }
 
-    render (){
+    componentDidMount(){
+        console.log(this.state.user);
 
-        let PrivateRoute = ({ component: Component, ...rest }) => (
-          <Route {...rest} render={(props) => (
-            this.state.user
-            ? <Component {...props} />
-            : <Redirect to={'/login'} />
-          )} />
-        );
-          // <PrivateRoute path='/wall/:username' component={ () => <Wall  user={this.state.user} />} />
+    }
+
+ render (){
+        console.log(this.state.isTokenValidated);
+
         return (
             <BrowserRouter>
             <Nav user={this.state.user} handle_logout={this.handle_logout}/>
             <Switch>
               <Route
                   path='/wall/:username'
-                  render={(props) => { return this.state.user ? <Wall {...props} user={this.state.user} /> : <Redirect to={'/login'} /> }}
+                  render={(props) => { return this.state.user && this.state.isTokenValidated? <Wall {...props} user={this.state.user} /> : <Redirect to={'/login'} /> }}
               />
               <Route path='/login'>
-                    {this.state.user ? <Redirect to={"/wall/"+this.state.user.username} />
+                    {this.state.user && this.state.isTokenValidated ? <Redirect to={"/wall/"+this.state.user.username} />
                       :
                       <LoginPage handle_login={this.handle_login} login_errors={this.state.login_errors}
                            handle_signup={this.handle_signup} signup_errors={this.state.signup_errors}/>
                     }
               </Route>
               <Route>
-                 {this.state.user ? <Redirect to={"/wall/"+this.state.user.username} />  : <Redirect to='/login' />}
+                 {this.state.user && this.state.isTokenValidated ? <Redirect to={"/wall/"+this.state.user.username} />  : <Redirect to='/login' />}
               </Route>
             </Switch>
             </BrowserRouter>

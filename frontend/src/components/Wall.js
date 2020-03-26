@@ -6,10 +6,10 @@ import {Grid} from 'semantic-ui-react';
 
 class Wall extends React.Component {
 
-      state = {
-          posts : null,
-          submittedPost: false
-      };
+    state = {
+      posts : null,
+      submittedPost: false
+    };
 
     componentDidMount() {
         console.log(this.props);
@@ -117,7 +117,7 @@ class Wall extends React.Component {
         let Posts = null;
         if(this.state.posts){
             Posts = this.state.posts.map((post) =>
-                <Post key={post._id} data={post} delete_post={() => this.delete_post(post._id)} react_to_post={this.react_to_post} user={this.props.user}/>
+                <Post key={post._id} post={post} delete_post={() => this.delete_post(post._id)} react_to_post={this.react_to_post} user={this.props.user}/>
             );
         }
 
@@ -134,12 +134,12 @@ class Wall extends React.Component {
                             <Segment raised>
                                 <Placeholder>
                                     <Placeholder.Header image>
-                                    <Placeholder.Line />
-                                    <Placeholder.Line />
+                                        <Placeholder.Line />
+                                        <Placeholder.Line />
                                     </Placeholder.Header>
                                     <Placeholder.Paragraph>
-                                    <Placeholder.Line length='medium' />
-                                    <Placeholder.Line length='short' />
+                                        <Placeholder.Line length='medium' />
+                                        <Placeholder.Line length='short' />
                                     </Placeholder.Paragraph>
                                 </Placeholder>
                             </Segment>
