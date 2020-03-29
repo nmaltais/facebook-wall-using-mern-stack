@@ -1,5 +1,5 @@
 import React from 'react';
-import { Menu , Segment, Icon, Dropdown} from 'semantic-ui-react';
+import { Menu , Segment, Icon, Dropdown, Label} from 'semantic-ui-react';
 import '../scss/Nav.scss';
 
 function Nav(props) {
@@ -16,7 +16,10 @@ function Nav(props) {
         <Menu className='Menu' compact floated>
           <Dropdown item icon='settings' simple>
             <Dropdown.Menu><Dropdown.Divider />
-              <Dropdown.Item ><Icon name='user' size='big' bordered circular/>{props.user.username}</Dropdown.Item>
+              <Dropdown.Item>
+              <Label circular color={props.user.avatarColor} style={{width: '30px', height:'30px', verticalAlign: 'center', fontSize:'15px'}}>{ props.user.username[0].toUpperCase() }</Label>
+              <span style={{color:'white'}}>{props.user.username}</span>
+              </Dropdown.Item>
               <Dropdown.Divider />
               <Dropdown.Item className="Item" onClick={props.handle_logout}>Logout <Icon color='grey' name='power off' /></Dropdown.Item>
             </Dropdown.Menu>

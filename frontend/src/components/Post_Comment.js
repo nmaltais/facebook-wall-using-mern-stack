@@ -1,5 +1,5 @@
 import React from 'react';
-import { TextArea, Icon, Grid} from 'semantic-ui-react';
+import { TextArea, Label, Grid} from 'semantic-ui-react';
 
 
 const CommentStyle={backgroundColor:'#f2f3f5',
@@ -64,15 +64,18 @@ class Post_Comment extends React.Component{
             //This year
             if(inputDay===currentDay){
                 //Sometime today
-                if(inputHours===currentHours){
+                if(inputHours===currentHours || currentMinutes-inputMinutes < 60){
                     //Within the last hour
-                    if(currentMinutes-inputMinutes > 5){
-                        //Less than 5 minutes ago
+                    let  minsAgo = null
+                    if (inputHours===currentHours) minsAgo = currentMinutes-inputMinutes;
+                    else {minsAgo = (60-inputMinutes)+currentMinutes; }
+                    if(currentMinutes-inputMinutes == 0){
                         return 'now';
-                    }else {
-                        return `${currentMinutes-inputMinutes}m`;
+                    }else{
+                        return `${minsAgo}m`;
                     }
-                }else{
+                }
+                else{
                     if(currentMinutes-inputMinutes > 30){ //Rounding hours
                         return `${currentHours-inputHours+1}h`;
                     }else{
@@ -111,9 +114,10 @@ class Post_Comment extends React.Component{
         }
 
         return(
-            <Grid style={{margin:'0px 0px -16px -20px'}}>
-                    <Grid.Column width={2} style={{margin:'0px -10px 0px 0px'}}>
-                        <Icon width='1'  name='user' size='large'  bordered circular style={{margin:'-8px 0px 0px 0px'}}/>
+            <Grid style={{margin:'-15px 0px -20px -20px'}}>
+                    <Grid.Column width={2} style={{margin:'0px -20px 0px 0px'}}>
+                    <Label circular color={comment.Author.avatarColor} style={{width: '32px', height:'32px', verticalAlign: 'center', fontSize:'16px'}}>{ comment.Author.username[0].toUpperCase() }</Label>
+
                     </Grid.Column>
                     <Grid.Column width={14}>
                         <Grid.Row style={{margin:'0px !important', padding:'0px !important'}}>
@@ -122,7 +126,7 @@ class Post_Comment extends React.Component{
                             </div>
                         </Grid.Row>
                         <Grid.Row style={{margin:'0px !important', padding:'0px !important'}}>
-                            <div style={{padding:'8px'}}><a style={LinkStyle}>Like</a> · <a style={LinkStyle}>Reply</a> · <span style={formatedDateStyle}>{this.formatDateTime(comment.createdAt)}</span></div>
+                            <div style={{marginLeft:'8px', marginBottom:'8px'}}><a style={LinkStyle}>Like</a> · <a style={LinkStyle}>Reply</a> · <span style={formatedDateStyle}>{this.formatDateTime(comment.createdAt)}</span></div>
                         </Grid.Row>
                     </Grid.Column>
             </Grid>

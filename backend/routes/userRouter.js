@@ -43,6 +43,11 @@ userRouter.route('/')
 })
 
 userRouter.post('/signup', cors.corsWithOptions, (req, res, next) => {
+  //Get random color for account
+  const colors = ['red', 'orange', 'yellow', 'olive', 'green', 'teal', 'blue', 'violet', 'purple', 'pink', 'brown', 'grey', 'black']
+  let color = colors[Math.floor(Math.random() * 12)];
+
+  req.body.avatarColor = color;
 
   Users.register(new Users(req.body),
     req.body.password, (err, user) => {

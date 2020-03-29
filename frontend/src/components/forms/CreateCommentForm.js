@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, Form, Icon } from 'semantic-ui-react';
+import { Card, Form, Label } from 'semantic-ui-react';
 import TextareaAutosize from 'react-textarea-autosize';
 
 class CreateCommentForm extends React.Component{
@@ -37,9 +37,9 @@ class CreateCommentForm extends React.Component{
         const ref = React.createRef();
 
         return (
-            <Form ref={ref} onSubmit={this.submit}>
+            <Form ref={ref} onSubmit={this.submit} style={{marginTop:'10px'}}>
             <Form.Group >
-                <Icon width='1'  name='user' size='large'  bordered circular style={{width:'42px !important'}}/>
+                <Label circular color={this.props.user.avatarColor} style={{width: '32px', height:'32px', verticalAlign: 'center',fontSize:'16px'}}>{ this.props.user.username[0].toUpperCase() }</Label>
 
                 <Form.Field style={{width:'90%'}}>
                     <TextareaAutosize

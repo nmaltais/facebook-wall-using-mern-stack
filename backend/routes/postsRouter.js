@@ -24,9 +24,14 @@ postsRouter.route('/')
     .catch((err) => next(err));
 })
 .delete((req, res, next) => {
-    res.statusCode = 403;
-    res.end('POST operation not supported on /user');
-});
+    Posts.deleteMany({})
+    .then((resp) => {
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'application/json');
+        res.json(resp);
+    }, (err) => next(err))
+    .catch((err) => next(err));
+})
 
 postsRouter.route('/:username')
 .get(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {

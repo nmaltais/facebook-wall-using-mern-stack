@@ -69,10 +69,6 @@ class Wall extends React.Component {
         } else if (reaction.Type != reactionType){
             action = 'PUT';
         }
-        console.log(post.Reactions);
-        console.log(reaction);
-        console.log('action');
-        console.log(action);
 
         if(action){
             fetch('http://127.0.0.1:3000/posts/react/'+post._id, {
@@ -117,7 +113,13 @@ class Wall extends React.Component {
         let Posts = null;
         if(this.state.posts){
             Posts = this.state.posts.map((post) =>
-                <Post key={post._id} post={post} delete_post={() => this.delete_post(post._id)} react_to_post={this.react_to_post} user={this.props.user}/>
+                <Post key={post._id}
+                    post={post}
+                    delete_post={() => this.delete_post(post._id)}
+                    react_to_post={this.react_to_post}
+                    user={this.props.user}
+                    wallOwner={this.props.match.params.username}
+                />
             );
         }
 
@@ -126,7 +128,7 @@ class Wall extends React.Component {
             <Grid centered columns={3}>
                 <Grid.Row>
                     <Grid.Column>
-                        <CreatePostForm handle_newPost={this.handle_newPost}/>
+                        <CreatePostForm handle_newPost={this.handle_newPost} user={this.props.user}/>
                         <br></br>
                         <h2>Posts</h2>
                         {Posts ? Posts

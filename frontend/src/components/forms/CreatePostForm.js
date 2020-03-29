@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, Form, Icon } from 'semantic-ui-react';
+import { Card, Form, Label } from 'semantic-ui-react';
 import TextareaAutosize from 'react-textarea-autosize';
 
 const CardHeaderStyle={padding:'10px', backgroundColor:'#f5f6f7', color:'#1d2129', fontWeight:'700', fontFamily:'system-ui'};
@@ -29,12 +29,13 @@ class CreatePostForm extends React.Component{
                 <Card.Content textAlign='center' style={{padding:'0px'}}>
                     <Form size='large' style={FormStyle} onSubmit={e => this.submit(e)}>
                         <Form.Group style={{ margin:'0px'}}>
-                            <Icon name='user' size='large' bordered circular/>
+                            <Label circular color={this.props.user.avatarColor} style={{width: '32px', height:'32px', verticalAlign: 'center',fontSize:'16px'}}>{ this.props.user.username[0].toUpperCase() }</Label>
+
                             <Form.TextArea
                             value={this.state.Text}
                             onChange={this.handleChange}
                             control={TextareaAutosize}
-                            placeholder="What's on your mind, Nicolas?"
+                            placeholder={`What's on your mind, ${this.props.user.username}?`}
                             width='14'
                             style={FormTextAreaStyle}></Form.TextArea>
                         </Form.Group>

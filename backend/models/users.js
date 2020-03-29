@@ -17,6 +17,9 @@ var userSchema = new Schema({
         type: String,
         required: true
     },
+    avatarColor : {
+        type: String
+    },
     admin:   {
         type: Boolean,
         default: false

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, Icon, Button, Grid} from 'semantic-ui-react';
+import { Card, Icon, Label, Button, Grid} from 'semantic-ui-react';
 import PostReactions from './PostReactions';
 import PostReactionButton from './PostReactionButton';
 import CreateCommentForm from './forms/CreateCommentForm';
@@ -32,13 +32,15 @@ class Post extends React.Component {
             //This year
             if(inputDay===currentDay){
                 //Sometime today
-                if(inputHours===currentHours){
+                if(inputHours===currentHours || currentMinutes-inputMinutes < 60){
+                    let  minsAgo = null
+                    if (inputHours===currentHours) minsAgo = currentMinutes-inputMinutes;
+                    else {minsAgo = (60-inputMinutes)+currentMinutes; }
                     //Within the last hour
-                    if(currentMinutes-inputMinutes > 5){
-                        //Less than 5 minutes ago
-                        return 'Less than 5 minutes ago';
-                    }else {
-                        return `${currentMinutes-inputMinutes} minutes ago`;
+                    if(currentMinutes-inputMinutes == 0){
+                        return 'now';
+                    }else{
+                        return `${minsAgo} minutes ago`;
                     }
                 }else{
                     if(currentMinutes-inputMinutes > 30){ //Rounding hours
@@ -111,7 +113,6 @@ class Post extends React.Component {
 
     render() {
         let post = this.props.post;
-        post.createdAt = this.formatDateTime(post.createdAt);
 
 
         const ref = React.createRef();
@@ -120,25 +121,27 @@ class Post extends React.Component {
             return <Post_Comment key={comment._id} comment={comment} />;
         });
 
-
         const colors = ['red','orange','yellow','olive','green','teal','blue','violet','purple','pink','brown','grey','black'];
         return (
             <React.Fragment>
                 <Card fluid style={{textAlign:'left'}}>
                     <Card.Content style={{paddingBottom:'0px'}}>
-                        <div style={{float:'right', cursor:'pointer'}} onClick={this.props.delete_post}>
-                          <i className="delete icon normal"></i>
-                        </div>
-                        <Icon style={{float:'left',marginRight:'10px'}} color={colors[post.author]} name='user secret' size='big'  bordered circular/>
-                        <Card.Header style={{marginTop:'7px'}}>
+                        {this.props.user.username == this.props.wallOwner ?
+                            <div style={{float:'right', cursor:'pointer'}} onClick={this.props.delete_post}>
+                              <i className="delete icon normal"></i>
+                            </div>
+                            : ''}
+
+                        <Label circular color={post.Author.avatarColor} style={{float:'left',marginRight:'10px',marginLeft:'-5px',width: '40px', height:'40px', verticalAlign: 'center', fontSize:'20px'}}>{ post.Author.username[0].toUpperCase() }</Label>
+
+                        <Card.Header>
                             <a href={'/wall/'+post.Author.username} style={{color:'#385898', fontFamily:'system-ui', fontSize:'14px'}}>{post.Author.username}</a>
                         </Card.Header>
-                        <Card.Meta style={{color:'#616770', fontFamily:'system-ui'}}>
-                            <span className='date'>{post.createdAt}</span>
+                        <Card.Meta style={{color:'#616770', fontFamily:'system-ui', fontSize:'12px', fontWeight:'400'}}>
+                            <span className='date'>{this.formatDateTime(post.createdAt)}</span>
                         </Card.Meta>
                         <br></br>
-                        <br></br>
-                        <Card.Description style={{color:'#000'}}>
+                        <Card.Description style={{color:'#000', fontSize:'14px', fontWeight:'400', lineHeight:'19px', fontFamily:'system-ui'}}>
                             {post.Text}
                         </Card.Description>
                         <br></br>
