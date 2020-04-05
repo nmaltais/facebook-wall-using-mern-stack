@@ -1,0 +1,38 @@
+
+.PostCommentBtn, .PostReactBtn{
+    background-color: white !important;
+    height: 30px !important;
+    padding: 0px !important;
+    margin: 5px 0px !important;
+    border-radius: 2px !important;
+    &:hover{
+        background-color:#f6f6f6 !important;
+    } 
+}
+.Avatar {
+    float: left !important;
+    margin-right: 10px !important;
+    margin-left:-5px !important;
+    width:40px !important;
+    height:40px !important;
+    vertical-align: middle !important;
+    font-size: 20px !important;
+}
+.PostText {
+    color: black !important;
+    font-size: 14px !important;
+    font-weight: 400 !important;
+    line-height: 19px !important;
+    font-family: system-ui !important;
+}
+.FormattedDate{
+    color: #616770 !important;
+    font-family: system-ui !important;
+    font-size:12px !important;
+    font-weight:400 !important;
+}
+.AuthorName {
+    color: #385898 !important;
+    font-family: system-ui !important;
+    font-size:14px !important;
+}

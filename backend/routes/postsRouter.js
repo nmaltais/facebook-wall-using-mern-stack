@@ -35,6 +35,7 @@ postsRouter.route('/')
 
 postsRouter.route('/:username')
 .get(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
+    //Get all posts from this User's Wall
     Users.findOne({username : req.params.username})
     .then((OnWallOf) => {
         if(!OnWallOf){
@@ -60,6 +61,7 @@ postsRouter.route('/:username')
 
 })
 .post(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
+    //Add a Post to this User's Wall
     req.body.Author = req.user._id;
     console.log(req.params.username);
     Users.findOne({username : req.params.username})
@@ -79,7 +81,7 @@ postsRouter.route('/:username')
 
 postsRouter.route('/:postID') //Would conflict with /:username .delete if implemented
 .delete(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
-  //Delete a post on a user's post
+  //Delete a Post on the User's Wall
     Posts.findOne({OnWallOf : req.user, _id : req.params.postID})
     .then((post) => {
         console.log('post');
@@ -100,7 +102,28 @@ postsRouter.route('/:postID') //Would conflict with /:username .delete if implem
     .catch((err) => next(err));
 });
 
-postsRouter.route('/react/:postID')
+postsRouter.route('/:postID/reactions')
+.get(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
+    //Get all reactions for a post
+    Posts.findOne({_id : req.params.postID})
+    .populate('Author')
+    .populate('OnWallOf')
+    .populate({ path: 'Reactions',
+                // Get User for each reaction
+                populate: { path: 'User' }
+              })
+    .then((post) => {
+        if(!post){
+            res.statusCode = 403;
+            res.end('Post _id: '+req.params.postID+' cannot be found');
+        } else {
+            res.statusCode = 200;
+            res.setHeader('Content-Type', 'application/json');
+            res.json(post);
+        }
+    }, (err) => next(err))
+    .catch((err) => next(err));
+})
 .post(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
     //Add a reaction to this post for a user
     Posts.findOne({_id : req.params.postID})
@@ -117,17 +140,6 @@ postsRouter.route('/react/:postID')
                 res.statusCode = 200;
                 res.setHeader('Content-Type', 'application/json');
                 res.json(post);
-                // .then((post) => {
-                //     Post.findById(post._id)
-                //     .populate('Reactions')
-                //     .then((post) => {
-                //         res.statusCode = 200;
-                //         res.setHeader('Content-Type', 'application/json');
-                //         res.json(post);
-                //     }, (err) => next(err))
-                //     .catch((err) => next(err));
-                // }, (err) => next(err))
-                // .catch((err) => next(err));
             }, (err) => next(err))
             .catch((err) => next(err));
         }
@@ -213,12 +225,13 @@ postsRouter.route('/:postID/comments')
     .catch((err) => next(err));
 })
 .get(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
-    //Add a comment to this post for a user
+    //Get all Comments on a Post
     Posts.findOne({_id : req.params.postID})
     .populate({ path: 'Comments',
                 // Get User for each reaction
-                populate: { path: 'Author' }
+                populate: [{ path: 'Author' }, { path: 'Reactions', populate:{path:'User'}}, { path: 'Replies' }]
               })
+
     .then((post) => {
         if(!post){
             res.statusCode = 403;

@@ -1,9 +1,11 @@
 import React from 'react';
 import { Card, Icon, Label, Button, Grid} from 'semantic-ui-react';
 import PostReactions from './PostReactions';
-import PostReactionButton from './PostReactionButton';
+import ReactionsMenu from './ReactionsMenu';
 import CreateCommentForm from './forms/CreateCommentForm';
 import Post_Comment from './Post_Comment';
+import ReactionIcon from './ReactionIcon';
+import '../scss/Post.scss';
 
 class Post extends React.Component {
 
@@ -109,19 +111,72 @@ class Post extends React.Component {
         event.preventDefault();
     }
 
+    react_to_item = (item, reactionType) => {
 
+        let reaction = item.Reactions.filter(reaction => reaction.User._id == this.props.user._id)[0];
+        
+        let action = null;
+        
+        if(reaction == null){
+            action = 'POST';
+        } else if(reaction.Type == reactionType){
+            action = 'DELETE';
+        } else if (reaction.Type != reactionType){
+            action = 'PUT';
+        }
+
+        if(action){
+            let itemType = (item.OnWallOf ? 'Post' : 'Comment');
+            let url = (itemType == 'Post' ? `http://127.0.0.1:3000/posts/${item._id}/reactions` : `http://127.0.0.1:3000/comments/${item._id}/reactions`);
+            fetch(url, {
+                method: action,
+                headers: {
+                'Content-Type': 'application/json',
+                'Authorization' : 'Bearer ' + localStorage.getItem("token")
+                }
+                , body : JSON.stringify({Type: reactionType})
+            })
+            .then(response => response.json())
+            .then(json => {
+                if(itemType == 'Post'){
+                    this.props.reloadPostReactions(this.props.post);
+                }else{
+                    this.loadComments();
+                }
+            });
+
+        }else{
+            console.log('Error: Could not react to post.');
+        }
+    }
 
     render() {
+        console.log('render post');
+        
         let post = this.props.post;
+
+        let createReactButton = () => {
+            let reaction = post.Reactions.filter(reaction => reaction.User._id == this.props.user._id)[0];
+            let reactionIcon = null;
+            
+            if(reaction){
+                reactionIcon = <span><ReactionIcon reactionType={reaction.Type} /> {reaction.Type}</span>
+            } else {
+                reactionIcon = <span><Icon name='thumbs up outline' color='grey' /> Like</span>
+            }
+
+            return <Button className='PostReactBtn' fluid 
+                    onClick={() => {this.props.react_to_post(post, reaction?reaction.Type:'Like')}}
+                    >{reactionIcon}</Button>
+        }
 
 
         const ref = React.createRef();
 
         let Comments = this.state.comments.map(comment => {
-            return <Post_Comment key={comment._id} comment={comment} />;
+            return <Post_Comment key={comment._id} comment={comment} user={this.props.user} react_to_item={this.react_to_item}/>;
         });
 
-        const colors = ['red','orange','yellow','olive','green','teal','blue','violet','purple','pink','brown','grey','black'];
         return (
             <React.Fragment>
                 <Card fluid style={{textAlign:'left'}}>
@@ -132,16 +187,16 @@ class Post extends React.Component {
                             </div>
                             : ''}
 
-                        <Label circular color={post.Author.avatarColor} style={{float:'left',marginRight:'10px',marginLeft:'-5px',width: '40px', height:'40px', verticalAlign: 'center', fontSize:'20px'}}>{ post.Author.username[0].toUpperCase() }</Label>
+                        <Label circular color={post.Author.avatarColor} className='Avatar'>{ post.Author.username[0].toUpperCase() }</Label>
 
                         <Card.Header>
-                            <a href={'/wall/'+post.Author.username} style={{color:'#385898', fontFamily:'system-ui', fontSize:'14px'}}>{post.Author.username}</a>
+                            <a href={'/wall/'+post.Author.username} className='AuthorName'>{post.Author.username}</a>
                         </Card.Header>
-                        <Card.Meta style={{color:'#616770', fontFamily:'system-ui', fontSize:'12px', fontWeight:'400'}}>
-                            <span className='date'>{this.formatDateTime(post.createdAt)}</span>
+                        <Card.Meta>
+                            <span className='FormattedDate'>{this.formatDateTime(post.createdAt)}</span>
                         </Card.Meta>
                         <br></br>
-                        <Card.Description style={{color:'#000', fontSize:'14px', fontWeight:'400', lineHeight:'19px', fontFamily:'system-ui'}}>
+                        <Card.Description className='PostText'>
                             {post.Text}
                         </Card.Description>
                         <br></br>
@@ -150,10 +205,13 @@ class Post extends React.Component {
                         <Grid columns={2} stackable style={{marginTop:'-20px'}}>
                             <Grid.Row>
                             <Grid.Column>
-                                <PostReactionButton react_to_post={this.props.react_to_post} post={post} userID={this.props.user._id}/>
+                                <ReactionsMenu  trigger={createReactButton()} 
+                                                react_to_item={this.react_to_item} 
+                                                item={post} 
+                                                userID={this.props.user._id}/>
                             </Grid.Column>
                             <Grid.Column>
-                            <Button fluid style={{backgroundColor:'white'}} onClick={()=>{ ref.current.focus();}}><Icon name='comment outline' color='grey'/> Comment </Button>
+                            <Button className='PostCommentBtn' fluid onClick={()=>{ ref.current.focus();}}><Icon name='comment outline' color='grey'/> Comment </Button>
                             </Grid.Column>
                             </Grid.Row>
                         </Grid>

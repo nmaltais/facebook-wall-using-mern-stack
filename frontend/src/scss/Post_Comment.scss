@@ -1,0 +1,51 @@
+
+.CommentAvatar {
+    width: 32px !important;
+    height: 32px !important;
+    vertical-align: middle !important;
+    font-size: 16px !important;
+    
+}
+.Link {
+    color: #385898 !important;
+    font-family: system-ui;
+    font-size: 12px;
+    line-height: 12px;
+}
+.LinkBold {
+    color: #385898 !important;
+    font-family: system-ui;
+    font-size: 12px;
+    line-height: 12px;
+    font-weight: bold;
+}
+.FormatedDate { 
+    color: #90949c !important;
+    font-family: system-ui;
+    font-size: 12px;
+    line-height: 12px;
+}
+.SeeMoreBtn {
+    color: #385898 !important;
+    font-family: system-ui;
+    font-size: 13px;
+    line-height: 16px;
+}
+.comment {
+    background-color:#f2f3f5;
+    border-radius: 18px;
+    color:#1c1e21;
+    line-height: 16px;
+    word-wrap: break-word;
+    padding:8px;
+    font-size:13px;
+    white-space: pre-wrap;
+    position: relative;
+    display: inline-block;
+}
+.Author {
+    color: #385898 !important;
+    font-family: system-ui;
+    font-size: 12px;
+    font-weight:600 !important;
+}

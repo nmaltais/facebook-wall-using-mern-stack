@@ -4,6 +4,7 @@ const http = require('http');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const postsRouter = require('./routes/postsRouter');
+const commentsRouter = require('./routes/commentsRouter');
 const reactionsRouter = require('./routes/reactionsRouter');
 const userRouter = require('./routes/userRouter');
 const mongoose = require('mongoose');
@@ -22,6 +23,7 @@ app.use(bodyParser.json());
 
 app.use(passport.initialize());
 app.use('/posts', postsRouter);
+app.use('/comments', commentsRouter);
 app.use('/users', userRouter);
 app.use('/reactions', reactionsRouter);
 

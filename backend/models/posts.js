@@ -27,6 +27,10 @@ const commentSchema = new Schema({
     Reactions : {
         type: [{type: mongoose.Schema.Types.ObjectId,
         ref: 'Reaction'}]
+    },
+    Replies : {
+        type: [{type: mongoose.Schema.Types.ObjectId,
+            ref: 'Comment'}]
     }
 }, {
     timestamps: true

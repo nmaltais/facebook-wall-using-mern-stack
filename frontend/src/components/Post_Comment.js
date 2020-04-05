@@ -1,41 +1,8 @@
 import React from 'react';
-import { TextArea, Label, Grid} from 'semantic-ui-react';
-
-
-const CommentStyle={backgroundColor:'#f2f3f5',
-                    borderRadius:'18px',
-                    color:'#1c1e21',
-                    lineHeight: '16px',
-                    wordWrap: 'break-word',
-                    padding:'8px',
-                    fontSize:'13px',
-                    whiteSpace: 'pre-wrap'
-
-                   };
-const AuthorStyle={
-    color:'#385898',
-    fontFamily:'system-ui',
-    fontSize:'13px',
-    fontWeight:600
-}
-const LinkStyle={
-    color:'#385898',
-    fontFamily:'system-ui',
-    fontSize:'12px',
-    lineHeight:'12px'
-}
-const formatedDateStyle = {
-    color: '#90949c',
-    fontFamily:'system-ui',
-    fontSize:'12px',
-    lineHeight:'12px'
-}
-const seeMoreBtnStyle = {
-    color:'#385898',
-    fontFamily:'system-ui',
-    fontSize:'13px',
-    lineHeight:'16px'
-}
+import { Label, Grid} from 'semantic-ui-react';
+import ReactionsMenu from './ReactionsMenu';
+import CommentReactions from './CommentReactions';
+import '../scss/Post_Comment.scss';
 
 class Post_Comment extends React.Component{
 
@@ -93,81 +60,55 @@ class Post_Comment extends React.Component{
         }
     }
 
-
-    componentDidMount(){
-        //Rendered
-
-    }
-
-
     render(){
         let comment = this.props.comment;
 
         let commentText = comment.Text;
         if(comment.Text.length > 420 && !this.state.seeMore){
-            commentText = (<>{comment.Text.slice(0,350)}... <a style={seeMoreBtnStyle} onClick={()=>this.setState({seeMore : true})}>See More</a></>)
+            commentText = (<>{comment.Text.slice(0,350)}... <a className='SeeMoreBtn' onClick={()=>this.setState({seeMore : true})}>See More</a></>)
         }
         else if(comment.Text.split(/\r\n|\r|\n/).length > 3 && !this.state.seeMore){
             let arr = comment.Text.split(/\r\n|\r|\n/);
-            commentText = (<>{arr[0]+'\n'+arr[1]+'\n'+arr[2]}... <a style={seeMoreBtnStyle} onClick={()=>this.setState({seeMore : true})}>See More</a></>)
+            commentText = (<>{arr[0]+'\n'+arr[1]+'\n'+arr[2]}... <a className='SeeMoreBtn' onClick={()=>this.setState({seeMore : true})}>See More</a></>)
 
+        }
+
+        let createReactButton = () => {
+            let reaction = comment.Reactions.filter(reaction => reaction.User._id == this.props.user._id)[0];
+            
+            let reactionIcon = null;
+            if(reaction){
+                reactionIcon = <a onClick={()=>{this.props.react_to_item(comment, reaction.Type)}} className='LinkBold'>{reaction.Type}</a>
+            } else {
+                reactionIcon = <a onClick={()=>{this.props.react_to_item(comment, 'Like')}} className='Link'>Like</a>
+            }
+            return reactionIcon;
         }
 
         return(
             <Grid style={{margin:'-15px 0px -20px -20px'}}>
                     <Grid.Column width={2} style={{margin:'0px -20px 0px 0px'}}>
-                    <Label circular color={comment.Author.avatarColor} style={{width: '32px', height:'32px', verticalAlign: 'center', fontSize:'16px'}}>{ comment.Author.username[0].toUpperCase() }</Label>
+                    <Label circular color={comment.Author.avatarColor} className='CommentAvatar'>{ comment.Author.username[0].toUpperCase() }</Label>
 
                     </Grid.Column>
                     <Grid.Column width={14}>
                         <Grid.Row style={{margin:'0px !important', padding:'0px !important'}}>
-                            <div className='comment' style={CommentStyle}>
-                                <a style={AuthorStyle}>{comment.Author.username}</a> {commentText}
-                            </div>
+                            <span className='comment'>
+                                <a className='Author'>{comment.Author.username}</a> {commentText} 
+                                <CommentReactions comment={comment}/>
+                            </span>
                         </Grid.Row>
                         <Grid.Row style={{margin:'0px !important', padding:'0px !important'}}>
-                            <div style={{marginLeft:'8px', marginBottom:'8px'}}><a style={LinkStyle}>Like</a> · <a style={LinkStyle}>Reply</a> · <span style={formatedDateStyle}>{this.formatDateTime(comment.createdAt)}</span></div>
+                            <div style={{marginLeft:'8px', marginBottom:'8px'}}>
+                            <ReactionsMenu  trigger={createReactButton()} 
+                                                react_to_item={this.props.react_to_item} 
+                                                item={comment}
+                                                userID={this.props.user._id}/>
+                                 · <a className='Link'>Reply</a> · <span className='FormatedDate'>{this.formatDateTime(comment.createdAt)}</span></div>
                         </Grid.Row>
                     </Grid.Column>
             </Grid>
         )
-
-        // <TextArea
-        //     style={{backgroundColor:'#f2f3f5', resize:'none', border:'1px solid #ccd0d5', borderRadius:'30px', lineHeight:'30px'}}
-        //     rows='1'
-        //     value={`<a>${comment.Author.username}</a>${comment.Text}`}
-        //     disabled
-        //     />
-
-        // <>
-        //     <Icon width='1'  name='user' size='large'  bordered circular style={{margin:'5px 5px 10px -8px'}}/>
-        //     <span className='comment' style={CommentStyle}>
-        //         <a style={AuthorStyle}>{comment.Author.username}</a> {comment.Text}
-        //     </span>
-        //     <div><a style={LinkStyle}>Like</a> · <a style={LinkStyle}>Reply</a> · <span style={formatedDate}>{this.formatDateTime(comment.createdAt)}</span></div>
-        // //
-        // </>
-
-
-
-
-        // <Grid style={{margin:'0px !important', padding:'0px !important'}}>
-        //         <Grid.Column width={2} style={{margin:'0px !important', padding:'0px !important'}}>
-        //             <Icon width='1'  name='user' size='large'  bordered circular/>
-        //         </Grid.Column>
-        //
-        //         <Grid.Column width={14} style={{margin:'0px !important', padding:'0px !important'}}>
-        //             <Grid.Row style={{margin:'0px !important', padding:'0px !important'}}>
-        //
-        //                 <span className='comment' style={CommentStyle}>
-        //                     <a>{comment.Author.username}</a> {comment.Text}
-        //                 </span>
-        //             </Grid.Row>
-        //             <Grid.Row style={{margin:'0px !important', padding:'0px !important'}}>
-        //                 <div><a>Like</a> · <a>Reply</a> · {this.formatDateTime(comment.createdAt)}</div>
-        //             </Grid.Row>
-        //         </Grid.Column>
-        // </Grid>
     }
 
 }

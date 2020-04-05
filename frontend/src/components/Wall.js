@@ -30,8 +30,6 @@ class Wall extends React.Component {
             else throw response;
         })
         .then(posts => {
-            console.log('Loaded posts');
-            console.log(posts);
             this.setState({posts: posts});
         })
         .catch((err) => {
@@ -60,7 +58,6 @@ class Wall extends React.Component {
 
         let reaction = post.Reactions.filter(reaction => reaction.User._id == this.props.user._id)[0];
 
-
         let action = null;
         if(reaction == null){
             action = 'POST';
@@ -71,7 +68,8 @@ class Wall extends React.Component {
         }
 
         if(action){
-            fetch('http://127.0.0.1:3000/posts/react/'+post._id, {
+            
+            fetch(`http://127.0.0.1:3000/posts/${post._id}/reactions`, {
                 method: action,
                 headers: {
                 'Content-Type': 'application/json',
@@ -87,7 +85,27 @@ class Wall extends React.Component {
         }else{
             console.log('Error: Could not react to post.');
         }
-
+    }
+    reloadPostReactions = (post) => {
+        //Find Post in posts
+        
+        fetch(`http://127.0.0.1:3000/posts/${post._id}/reactions`, {
+            method: 'GET',
+            headers: {
+            'Content-Type': 'application/json',
+            'Authorization' : 'Bearer ' + localStorage.getItem("token")
+            }
+        })
+        .then(response => response.json())
+        .then(post => {
+            let posts = this.state.posts;
+            posts.forEach(function(cPost){
+                if(cPost._id == post._id){
+                    cPost.Reactions = post.Reactions;
+                }
+            });
+            this.setState({posts: posts});
+        });
     }
 
     handle_newPost = (e, data) => {
@@ -117,6 +135,7 @@ class Wall extends React.Component {
                     post={post}
                     delete_post={() => this.delete_post(post._id)}
                     react_to_post={this.react_to_post}
+                    reloadPostReactions={this.reloadPostReactions}
                     user={this.props.user}
                     wallOwner={this.props.match.params.username}
                 />
