@@ -5,7 +5,8 @@ const reactionSchema = new Schema({
     User : {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
-        required: true
+        required: true,
+        autopopulate: true
     },
     Type : {
         type : String,
@@ -22,15 +23,18 @@ const commentSchema = new Schema({
     },
     Author : {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
+        ref: 'User',
+        autopopulate: true
     },
     Reactions : {
         type: [{type: mongoose.Schema.Types.ObjectId,
-        ref: 'Reaction'}]
+        ref: 'Reaction',
+        autopopulate: true}]
     },
     Replies : {
         type: [{type: mongoose.Schema.Types.ObjectId,
-            ref: 'Comment'}]
+            ref: 'Comment',
+            autopopulate: true}]
     }
 }, {
     timestamps: true
@@ -43,34 +47,31 @@ const postSchema = new Schema({
     },
     OnWallOf : {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
+        ref: 'User',
+        autopopulate: true
     },
     Author : {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
+        ref: 'User',
+        autopopulate: true
     },
     Reactions : {
         type: [{type: mongoose.Schema.Types.ObjectId,
-        ref: 'Reaction'}]
+        ref: 'Reaction',
+        autopopulate: true}]
     },
     Comments : {
         type: [{type: mongoose.Schema.Types.ObjectId,
-        ref: 'Comment'}]
+        ref: 'Comment',
+        autopopulate: true}]
     }
 }, {
     timestamps: true
 });
-/*{
-	"Text" : "this is a post",
-	"Author": {
-		"FirstName" : "Nic",
-		"LastName":"Maltais",
-		"UserID":"123"
-	},
-	"Reactions": [],
-	"Comments": []
-}*/
 
+reactionSchema.plugin(require('mongoose-autopopulate'));
+postSchema.plugin(require('mongoose-autopopulate'));
+commentSchema.plugin(require('mongoose-autopopulate'));
 
 var Posts = mongoose.model('Post', postSchema);
 var Reactions = mongoose.model('Reaction', reactionSchema);

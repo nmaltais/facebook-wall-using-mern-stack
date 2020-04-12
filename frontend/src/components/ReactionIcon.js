@@ -20,6 +20,9 @@ function ReactionIcon(props){
         case 'Hot':
             icon = <Icon name='fire' color='orange' circular inverted size='small'/>
         break;
+        default:
+            icon = null;
+        break;
 
     }
     return icon;

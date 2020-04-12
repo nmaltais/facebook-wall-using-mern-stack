@@ -5,7 +5,6 @@ const cors = require('./cors');
 
 
 const {Posts, Reactions, Comments} = require('../models/posts');
-const Users = require('../models/users');
 
 const commentsRouter = express.Router();
 commentsRouter.use(bodyParser.json());
@@ -70,11 +69,11 @@ commentsRouter.route('/:commentID/reactions')
             req.body.User = req.user._id;
             Reactions.create(req.body)
             .then((reaction) => {
-                comment.Reactions.push(reaction._id);
+                comment.Reactions.push(reaction);
                 comment.save()
                 res.statusCode = 200;
                 res.setHeader('Content-Type', 'application/json');
-                res.json(comment);
+                res.json(comment.Reactions);
             }, (err) => next(err))
             .catch((err) => next(err));
         }
@@ -84,7 +83,6 @@ commentsRouter.route('/:commentID/reactions')
 .put(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
     //Change the reaction of this user on this comment
     Comments.findById(req.params.commentID)
-    .populate('Reactions')
     .then(async (comment) => {
         if(!comment){
             res.statusCode = 403;
@@ -97,12 +95,11 @@ commentsRouter.route('/:commentID/reactions')
             console.log(reaction);
             await Reactions.updateOne({_id: reaction._id}, {Type: req.body.Type});
             Comments.findOne({_id : req.params.commentID})
-            .populate('Reactions')
             .then((comment) => {
                 console.log(comment);
                 res.statusCode = 200;
                 res.setHeader('Content-Type', 'application/json');
-                res.json(comment);
+                res.json(comment.Reactions);
             }, (err) => next(err))
             .catch((err) => next(err));
         }
@@ -112,22 +109,25 @@ commentsRouter.route('/:commentID/reactions')
 .delete(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
     //Delete a user's reaction on this comment
     Comments.findOne({_id : req.params.commentID})
-    .populate('Reactions')
     .then((comment) => {
         if(!comment){
             res.statusCode = 403;
             res.end('Comment _id: '+req.params.commentID+' cannot be found');
         } else {
 
-            let reaction = comment.Reactions.filter(reaction => req.user._id.equals(reaction.User))[0];
+            let reaction = comment.Reactions.filter(reaction => req.user._id.equals(reaction.User._id))[0];
 
             Reactions.deleteOne({_id : reaction._id})
             .then((resp) => {
                 console.log('Deleted Reaction: '+reaction._id);
                 console.log(resp);
-                res.statusCode = 200;
-                res.setHeader('Content-Type', 'application/json');
-                res.json(resp);
+                Comments.findOne({_id : req.params.commentID})
+                .then((comment)=>{
+                    res.statusCode = 200;
+                    res.setHeader('Content-Type', 'application/json');
+                    res.json(comment.Reactions);
+                }, (err) => next(err))
+                .catch((err) => next(err));
             }, (err) => next(err))
             .catch((err) => next(err));
         }
@@ -147,11 +147,12 @@ commentsRouter.route('/:commentID/replies')
             req.body.Author = req.user._id;
             Comments.create(req.body)
             .then((reply) => {
-                comment.Replies.push(reply._id);
+                comment.Replies.push(reply);
                 comment.save()
+                
                 res.statusCode = 200;
                 res.setHeader('Content-Type', 'application/json');
-                res.json(comment);
+                res.json(comment.Replies);
             }, (err) => next(err))
             .catch((err) => next(err));
         }
@@ -161,10 +162,6 @@ commentsRouter.route('/:commentID/replies')
 .get(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
     //Get replies for a comment 
     Comments.findOne({_id : req.params.commentID})
-    .populate({ path: 'Replies',
-                // Get User for each reaction
-                populate: { path: 'Author' }
-              })
     .then((comment) => {
         if(!comment){
             res.statusCode = 403;

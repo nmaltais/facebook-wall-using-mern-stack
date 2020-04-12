@@ -23,7 +23,7 @@ function CommentReactions(props){
 
 
     let reactionsDisplay = {};
-    props.comment.Reactions.forEach(reaction => {
+    props.reactions.forEach(reaction => {
         if(reactionsDisplay[reaction.Type] === undefined){
             reactionsDisplay[reaction.Type] = [reaction.User];
         }else{
@@ -34,18 +34,19 @@ function CommentReactions(props){
         let users = reactionsDisplay[reactionType];
         let count = users.length;
         let item = <span key={index}><ReactionIcon reactionType={reactionType} /></span>
-        let usersList = count > 1 ? count : <>{count} {users.map(user => { return <><br/><span style={{color:'#ccc'}} key={user.username}>{user.username}</span></> }) }</>
+        let usersList = count > 1 ? count : <>{count} {users.map(user => { return <span key={user.username}><br/><span style={{color:'#ccc'}} key={user.username}>{user.username}</span></span> }) }</>
                 
         return index===0 ? <>{item}{usersList}</>: <><br/><br/>{item}{usersList}</>;
     });
-    let trigger = <Label basic floating style={reactionsLabelStyle}>
+    let trigger = props.reactions.length > 0 ?
+                <Label basic floating style={reactionsLabelStyle}>
                     {
                         Object.keys(reactionsDisplay).map((reactionType,index) => {
                             return <span key={index} style={{marginRight:'-5px'}}><ReactionIcon reactionType={reactionType} /></span>
                         })
                     }
-                    <span style={{marginLeft:'5px'}} >{props.comment.Reactions.length}</span>
-                  </Label>
+                    <span style={{marginLeft:'5px'}} >{props.reactions.length}</span>
+                  </Label> : null
 
     return <Popup
                 trigger={trigger}

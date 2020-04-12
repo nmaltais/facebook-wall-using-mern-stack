@@ -4,7 +4,7 @@ import ReactionIcon from './ReactionIcon';
 
 function PostReactions(props){
 
-    let reactions = props.post.Reactions;
+    let reactions = props.reactions;
 
     let reactionsDisplay = {};
 

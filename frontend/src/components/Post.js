@@ -11,7 +11,7 @@ class Post extends React.Component {
 
     constructor(props){
         super(props);
-        this.state = { comments: []}
+        this.state = { comments: null, reactions: null, showCommentForm:false}
     }
 
     formatDateTime = (string) => {
@@ -39,7 +39,7 @@ class Post extends React.Component {
                     if (inputHours===currentHours) minsAgo = currentMinutes-inputMinutes;
                     else {minsAgo = (60-inputMinutes)+currentMinutes; }
                     //Within the last hour
-                    if(currentMinutes-inputMinutes == 0){
+                    if(currentMinutes-inputMinutes === 0){
                         return 'now';
                     }else{
                         return `${minsAgo} minutes ago`;
@@ -62,37 +62,7 @@ class Post extends React.Component {
         }
     }
 
-    componentDidMount(){
-        this.loadComments();
-    }
-
-    loadComments = () => {
-        fetch('http://127.0.0.1:3000/posts/'+this.props.post._id+'/comments', {
-            method: 'GET',
-            headers: {
-            'Content-Type': 'application/json',
-            'Authorization' : 'Bearer ' + localStorage.getItem("token")
-            }
-        })
-        .then(response => {
-            if(response.ok) return response.json();
-            else throw response;
-        })
-        .then(comments => {
-            console.log('Loaded comments for post '+this.props.post._id);
-            console.log(comments);
-            this.setState({comments: comments});
-        })
-        .catch((err) => {
-            if(err.status === 404){
-                window.location = '/wall';
-            }
-        });
-    }
-
     submitComment = (event, data) => {
-        console.log(event);
-        console.log('Comment submitted by '+ this.props.user.username +' on post: '+this.props.post._id);
 
         fetch('http://127.0.0.1:3000/posts/'+this.props.post._id+'/comments', {
             method: 'POST',
@@ -104,30 +74,28 @@ class Post extends React.Component {
         })
         .then(response => response.json())
         .then(json => {
-            this.loadComments();
-            console.log('done posting comment');
+            json[json.length - 1].Author = this.props.user;
+            this.setState({comments: json});
         });
 
         event.preventDefault();
     }
 
     react_to_item = (item, reactionType) => {
-
-        let reaction = item.Reactions.filter(reaction => reaction.User._id == this.props.user._id)[0];
+        let reaction = item.Reactions.filter(reaction => reaction.User._id === this.props.user._id)[0];
         
         let action = null;
         
-        if(reaction == null){
+        if(reaction === undefined){
             action = 'POST';
-        } else if(reaction.Type == reactionType){
+        } else if(reaction.Type === reactionType){
             action = 'DELETE';
-        } else if (reaction.Type != reactionType){
+        } else if (reaction.Type !== reactionType){
             action = 'PUT';
         }
 
         if(action){
-            let itemType = (item.OnWallOf ? 'Post' : 'Comment');
-            let url = (itemType == 'Post' ? `http://127.0.0.1:3000/posts/${item._id}/reactions` : `http://127.0.0.1:3000/comments/${item._id}/reactions`);
+            let url = `http://127.0.0.1:3000/posts/${item._id}/reactions`;
             fetch(url, {
                 method: action,
                 headers: {
@@ -138,11 +106,7 @@ class Post extends React.Component {
             })
             .then(response => response.json())
             .then(json => {
-                if(itemType == 'Post'){
-                    this.props.reloadPostReactions(this.props.post);
-                }else{
-                    this.loadComments();
-                }
+                this.setState({reactions: json});
             });
 
         }else{
@@ -150,13 +114,29 @@ class Post extends React.Component {
         }
     }
 
+    
+
     render() {
-        console.log('render post');
         
         let post = this.props.post;
+        post.Reactions = this.state.reactions ?? post.Reactions;
+        post.Comments = this.state.comments ?? post.Comments;
+
+        let showCommentForm = (ref) => {
+            if(post.Comments.length > 0){
+                ref.current.focus();
+                return;
+            } 
+            if(!this.state.showCommentForm){
+                this.setState({showCommentForm: true});
+            }else{
+                ref.current.focus();
+            }
+        }
 
         let createReactButton = () => {
-            let reaction = post.Reactions.filter(reaction => reaction.User._id == this.props.user._id)[0];
+            
+            let reaction = (this.state.reactions ?? post.Reactions).filter(reaction => reaction.User._id === this.props.user._id)[0];
             let reactionIcon = null;
             
             if(reaction){
@@ -166,14 +146,14 @@ class Post extends React.Component {
             }
 
             return <Button className='PostReactBtn' fluid 
-                    onClick={() => {this.props.react_to_post(post, reaction?reaction.Type:'Like')}}
+                    onClick={() => {this.react_to_item(post, reaction?reaction.Type:'Like')}}
                     >{reactionIcon}</Button>
         }
 
 
         const ref = React.createRef();
-
-        let Comments = this.state.comments.map(comment => {
+        
+        let Comments = (this.state.comments ?? post.Comments).map(comment => {
             return <Post_Comment key={comment._id} comment={comment} user={this.props.user} react_to_item={this.react_to_item}/>;
         });
 
@@ -181,7 +161,7 @@ class Post extends React.Component {
             <React.Fragment>
                 <Card fluid style={{textAlign:'left'}}>
                     <Card.Content style={{paddingBottom:'0px'}}>
-                        {this.props.user.username == this.props.wallOwner ?
+                        {this.props.user.username === this.props.wallOwner ?
                             <div style={{float:'right', cursor:'pointer'}} onClick={this.props.delete_post}>
                               <i className="delete icon normal"></i>
                             </div>
@@ -200,7 +180,7 @@ class Post extends React.Component {
                             {post.Text}
                         </Card.Description>
                         <br></br>
-                        <PostReactions post={post}/>
+                        <PostReactions reactions={this.state.reactions ?? post.Reactions}/>
                         <hr></hr>
                         <Grid columns={2} stackable style={{marginTop:'-20px'}}>
                             <Grid.Row>
@@ -211,15 +191,20 @@ class Post extends React.Component {
                                                 userID={this.props.user._id}/>
                             </Grid.Column>
                             <Grid.Column>
-                            <Button className='PostCommentBtn' fluid onClick={()=>{ ref.current.focus();}}><Icon name='comment outline' color='grey'/> Comment </Button>
+                            <Button className='PostCommentBtn' fluid onClick={() => {showCommentForm(ref);}}>
+                                <Icon name='comment outline' color='grey' style={{marginTop:'-10px'}} /> Comment </Button>
                             </Grid.Column>
                             </Grid.Row>
                         </Grid>
                     </Card.Content>
-                    <Card.Content extra>
-                        {Comments}
-                        <CreateCommentForm user={this.props.user} post={post} ref={ref} submitComment={this.submitComment} />
-                    </Card.Content>
+                    {
+                        post.Comments.length > 0 || this.state.showCommentForm ?
+                        <Card.Content extra>
+                            {Comments}
+                            <CreateCommentForm focusOnRender={this.state.showCommentForm} user={this.props.user} ref={ref} submitComment={this.submitComment} />
+                        </Card.Content>
+                        :''
+                    }
                 </Card>
             </React.Fragment>
         );

@@ -44,8 +44,9 @@ class ReactionsMenu extends Component{
                   trigger={this.props.trigger}
                 >
                   
-                  {reactionTypes.map(reactionType => {
+                  {reactionTypes.map((reactionType, index) => {
                            return <Popup
+                           key={index}
                            trigger={<span onClick={() => {this.handleReactionPick(reactionType)}}><ReactionIcon reactionType={reactionType} /></span>}
                            content={reactionType}
                            position='top center'

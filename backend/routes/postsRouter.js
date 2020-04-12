@@ -44,12 +44,6 @@ postsRouter.route('/:username')
         }
         Posts.find({OnWallOf : OnWallOf})
         .sort({'createdAt':-1})
-        .populate('Author')
-        .populate('OnWallOf')
-        .populate({ path: 'Reactions',
-                    // Get User for each reaction
-                    populate: { path: 'User' }
-                  })
         .then((posts) => {
             res.statusCode = 200;
             res.setHeader('Content-Type', 'application/json');
@@ -106,12 +100,6 @@ postsRouter.route('/:postID/reactions')
 .get(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
     //Get all reactions for a post
     Posts.findOne({_id : req.params.postID})
-    .populate('Author')
-    .populate('OnWallOf')
-    .populate({ path: 'Reactions',
-                // Get User for each reaction
-                populate: { path: 'User' }
-              })
     .then((post) => {
         if(!post){
             res.statusCode = 403;
@@ -119,7 +107,7 @@ postsRouter.route('/:postID/reactions')
         } else {
             res.statusCode = 200;
             res.setHeader('Content-Type', 'application/json');
-            res.json(post);
+            res.json(post.Reactions);
         }
     }, (err) => next(err))
     .catch((err) => next(err));
@@ -135,11 +123,11 @@ postsRouter.route('/:postID/reactions')
             req.body.User = req.user._id;
             Reactions.create(req.body)
             .then((reaction) => {
-                post.Reactions.push(reaction._id);
+                post.Reactions.push(reaction);
                 post.save()
                 res.statusCode = 200;
                 res.setHeader('Content-Type', 'application/json');
-                res.json(post);
+                res.json(post.Reactions);
             }, (err) => next(err))
             .catch((err) => next(err));
         }
@@ -150,7 +138,6 @@ postsRouter.route('/:postID/reactions')
     //Change the reaction of this user on this post
     console.log('updating');
     Posts.findById(req.params.postID)
-    .populate('Reactions')
     .then(async (post) => {
         if(!post){
             res.statusCode = 403;
@@ -158,17 +145,17 @@ postsRouter.route('/:postID/reactions')
         } else {
             console.log('found post');
             console.log(post);
+            console.log(req);
             let reaction = post.Reactions.filter(reaction => reaction.User._id.equals(req.user._id))[0];
             console.log('found reaction');
             console.log(reaction);
             await Reactions.updateOne({_id: reaction._id}, {Type: req.body.Type});
             Posts.findOne({_id : req.params.postID})
-            .populate('Reactions')
             .then((post) => {
                 console.log(post);
                 res.statusCode = 200;
                 res.setHeader('Content-Type', 'application/json');
-                res.json(post);
+                res.json(post.Reactions);
             }, (err) => next(err))
             .catch((err) => next(err));
         }
@@ -178,22 +165,27 @@ postsRouter.route('/:postID/reactions')
 .delete(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
     //Delete a user's reaction on this post
     Posts.findOne({_id : req.params.postID})
-    .populate('Reactions')
     .then((post) => {
         if(!post){
             res.statusCode = 403;
             res.end('Post _id: '+req.params.postID+' cannot be found');
         } else {
-
-            let reaction = post.Reactions.filter(reaction => req.user._id.equals(reaction.User))[0];
+            // console.log('okkkk');
+            
+            // console.log(post);
+            let reaction = post.Reactions.filter(reaction => req.user._id.equals(reaction.User._id))[0];
 
             Reactions.deleteOne({_id : reaction._id})
             .then((resp) => {
                 console.log('Deleted Reaction: '+reaction._id);
                 console.log(resp);
-                res.statusCode = 200;
-                res.setHeader('Content-Type', 'application/json');
-                res.json(resp);
+                Posts.findOne({_id : req.params.postID})
+                .then((post)=>{
+                    res.statusCode = 200;
+                    res.setHeader('Content-Type', 'application/json');
+                    res.json(post.Reactions);
+                }, (err) => next(err))
+                .catch((err) => next(err));
             }, (err) => next(err))
             .catch((err) => next(err));
         }
@@ -213,36 +205,36 @@ postsRouter.route('/:postID/comments')
             req.body.Author = req.user._id;
             Comments.create(req.body)
             .then((comment) => {
-                post.Comments.push(comment._id);
-                post.save()
+                post.Comments.push(comment);
+                post.save();
                 res.statusCode = 200;
                 res.setHeader('Content-Type', 'application/json');
-                res.json(post);
+                res.json(post.Comments);
             }, (err) => next(err))
             .catch((err) => next(err));
         }
     }, (err) => next(err))
     .catch((err) => next(err));
 })
-.get(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
-    //Get all Comments on a Post
-    Posts.findOne({_id : req.params.postID})
-    .populate({ path: 'Comments',
-                // Get User for each reaction
-                populate: [{ path: 'Author' }, { path: 'Reactions', populate:{path:'User'}}, { path: 'Replies' }]
-              })
+// .get(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
+//     //Get all Comments on a Post
+//     Posts.findOne({_id : req.params.postID})
+//     .populate({ path: 'Comments',
+//                 // Get User for each reaction
+//                 populate: [{ path: 'Author' }, { path: 'Reactions', populate:{path:'User'}}, { path: 'Replies' }]
+//               })
 
-    .then((post) => {
-        if(!post){
-            res.statusCode = 403;
-            res.end('Post _id: '+req.params.postID+' cannot be found');
-        } else {
-            res.statusCode = 200;
-            res.setHeader('Content-Type', 'application/json');
-            res.json(post.Comments);
-        }
-    }, (err) => next(err))
-    .catch((err) => next(err));
-})
+//     .then((post) => {
+//         if(!post){
+//             res.statusCode = 403;
+//             res.end('Post _id: '+req.params.postID+' cannot be found');
+//         } else {
+//             res.statusCode = 200;
+//             res.setHeader('Content-Type', 'application/json');
+//             res.json(post.Comments);
+//         }
+//     }, (err) => next(err))
+//     .catch((err) => next(err));
+// })
 
 module.exports = postsRouter;

@@ -17,7 +17,6 @@ class Wall extends React.Component {
     }
 
     loadPosts = () => {
-        console.log(this.props.match.params.username);
         fetch('http://127.0.0.1:3000/posts/'+this.props.match.params.username, {
             method: 'GET',
             headers: {
@@ -49,43 +48,10 @@ class Wall extends React.Component {
         })
         .then(response => response.json())
         .then(json => {
-            console.log(json);
             this.loadPosts();
         });
     }
 
-    react_to_post = (post, reactionType) => {
-
-        let reaction = post.Reactions.filter(reaction => reaction.User._id == this.props.user._id)[0];
-
-        let action = null;
-        if(reaction == null){
-            action = 'POST';
-        } else if(reaction.Type == reactionType){
-            action = 'DELETE';
-        } else if (reaction.Type != reactionType){
-            action = 'PUT';
-        }
-
-        if(action){
-            
-            fetch(`http://127.0.0.1:3000/posts/${post._id}/reactions`, {
-                method: action,
-                headers: {
-                'Content-Type': 'application/json',
-                'Authorization' : 'Bearer ' + localStorage.getItem("token")
-                }
-                , body : JSON.stringify({Type: reactionType})
-            })
-            .then(response => response.json())
-            .then(json => {
-                this.loadPosts();
-            });
-
-        }else{
-            console.log('Error: Could not react to post.');
-        }
-    }
     reloadPostReactions = (post) => {
         //Find Post in posts
         
@@ -100,7 +66,7 @@ class Wall extends React.Component {
         .then(post => {
             let posts = this.state.posts;
             posts.forEach(function(cPost){
-                if(cPost._id == post._id){
+                if(cPost._id === post._id){
                     cPost.Reactions = post.Reactions;
                 }
             });
