@@ -4,7 +4,7 @@ import TextareaAutosize from 'react-textarea-autosize';
 
 const CardHeaderStyle={padding:'10px', backgroundColor:'#f5f6f7', color:'#1d2129', fontWeight:'700', fontFamily:'system-ui'};
 const FormStyle = {padding:'10px 0px 0px 10px', margin:'0px'};
-const FormTextAreaStyle = {border:"none", height:"100%", resize:'none'};
+const FormTextAreaStyle = {border:"none", height:"100%", resize:'none', marginBottom:'20px'};
 const hr = {height:'1px', backgroundColor:'#eee', width:'100% + 10px', marginLeft:'-10px'}
 
 
@@ -37,6 +37,7 @@ class CreatePostForm extends React.Component{
                             control={TextareaAutosize}
                             placeholder={`What's on your mind, ${this.props.user.username}?`}
                             width='14'
+                            rows='4'
                             style={FormTextAreaStyle}></Form.TextArea>
                         </Form.Group>
                         <div style={hr}></div>

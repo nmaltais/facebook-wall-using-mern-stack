@@ -12,6 +12,7 @@ commentsRouter.use(bodyParser.json());
 commentsRouter.options('*', cors.corsWithOptions, (req,res) => {
     res.sendStatus(200);
 })
+/* DEV only
 commentsRouter.route('/')
 .get(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
     //Get all Comments
@@ -33,19 +34,20 @@ commentsRouter.route('/')
     }, (err) => next(err))
     .catch((err) => next(err));
 })
+*/
 
-commentsRouter.route('/:commentID')
+commentsRouter.route('/:commentID') /* TODO: implement this endpoints */
 .delete(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
   //Delete a particular Comment
-    Posts.findOne({OnWallOf : req.user, _id : req.params.postID})
-    .then((post) => {
-        console.log('post');
-        console.log(post);
+    Comments.findOne({Author : req.user, _id : req.params.commentID})
+    .then((comment) => {
+        console.log('comment');
+        console.log(comment);
         if(!post){
             res.statusCode = 403;
-            res.end('You cannot delete this post');
+            res.end('You cannot delete this comment');
         } else {
-            Posts.deleteOne({_id: post._id})
+            Comments.deleteOne({_id: comment._id})
             .then((resp) => {
                 res.statusCode = 200;
                 res.setHeader('Content-Type', 'application/json');

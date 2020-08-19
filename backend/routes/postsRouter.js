@@ -23,6 +23,7 @@ postsRouter.route('/')
     }, (err) => next(err))
     .catch((err) => next(err));
 })
+/* DEV ONLY
 .delete((req, res, next) => {
     Posts.deleteMany({})
     .then((resp) => {
@@ -32,6 +33,7 @@ postsRouter.route('/')
     }, (err) => next(err))
     .catch((err) => next(err));
 })
+*/
 
 postsRouter.route('/:username')
 .get(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {

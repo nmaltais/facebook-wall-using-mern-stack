@@ -14,6 +14,7 @@ userRouter.options('*', cors.corsWithOptions, (req,res) => {
     res.sendStatus(200);
 })
 
+/* DEV ONLY
 userRouter.route('/')
 .get((req, res, next) => {
     Users.find({})
@@ -41,6 +42,7 @@ userRouter.route('/')
     }, (err) => next(err))
     .catch((err) => next(err));
 })
+*/
 
 userRouter.post('/signup', cors.corsWithOptions, (req, res, next) => {
   //Get random color for account

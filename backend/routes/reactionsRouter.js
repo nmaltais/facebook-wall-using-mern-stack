@@ -11,7 +11,7 @@ reactionsRouter.use(bodyParser.json());
 // reactionsRouter.options('*', cors.corsWithOptions, (req,res) => {
 //     res.sendStatus(200);
 // })
-
+/* DEV Only
 reactionsRouter.route('/')
 .delete(cors.corsWithOptions, authenticate.verifyUser,(req, res, next) => {
     Reactions.deleteMany({})
@@ -31,6 +31,7 @@ reactionsRouter.route('/')
     }, (err) => next(err))
     .catch((err) => next(err));
 })
+*/
 
 
 module.exports = reactionsRouter;

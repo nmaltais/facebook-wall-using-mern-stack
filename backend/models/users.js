@@ -29,15 +29,3 @@ var userSchema = new Schema({
 userSchema.plugin(passportLocalMongoose, { usernameField : 'email' });
 
 module.exports = mongoose.model('User', userSchema);
-
-/*
-
-{
-	"firstname" : "Nic",
-	"lastname": "Maltais",
-    "email": "nic.maltais@gmail.com",
-	"password": "password",
-    "admin" : false
-}
-
-*/
